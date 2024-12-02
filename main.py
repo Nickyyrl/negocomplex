@@ -4,32 +4,32 @@ def recommander_offre():
     st.title("Sélection de la Meilleure Offre")
 
     # Collecte des réponses utilisateur
-    fiabilite_prioritaire = st.selectbox(
+    fiabilite_prioritaire = st.radio(
         "La fiabilité et la disponibilité sont-elles prioritaires ?",
         ("Oui", "Non")
     )
 
-    cout_initial_contrainte = st.selectbox(
+    cout_initial_contrainte = st.radio(
         "Le coût initial est-il une contrainte forte ?",
         ("Oui", "Non")
     )
 
-    productivite_energetique = st.selectbox(
+    productivite_energetique = st.radio(
         "Quelle priorité pour la productivité énergétique ?",
         ("Production maximale recherchée", "Priorité secondaire")
     )
 
-    reduction_impacts_environnementaux = st.selectbox(
+    reduction_impacts_environnementaux = st.radio(
         "La réduction des impacts environnementaux est-elle clé ?",
         ("Oui", "Non")
     )
 
-    solution_offshore = st.selectbox(
+    solution_offshore = st.radio(
         "Préférez-vous une solution adaptée aux contraintes offshore ?",
         ("Oui", "Non")
     )
 
-    phase_pilote = st.selectbox(
+    phase_pilote = st.radio(
         "Phase pilote acceptée pour tester la solution ?",
         ("Oui", "Non")
     )
