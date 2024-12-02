@@ -1,109 +1,82 @@
 import streamlit as st
 
-def recommander_offre():
-    st.title("Sélection de la Meilleure Offre")
-
-    # Collecte des réponses utilisateur
-    fiabilite_prioritaire = st.radio(
-        "La fiabilité et la disponibilité sont-elles prioritaires ?",
-        ("Oui", "Non")
-    )
-
-    cout_initial_contrainte = st.radio(
-        "Le coût initial est-il une contrainte forte ?",
-        ("Oui", "Non")
-    )
-
-    productivite_energetique = st.radio(
-        "Quelle priorité pour la productivité énergétique ?",
-        ("Production maximale recherchée", "Priorité secondaire")
-    )
-
-    reduction_impacts_environnementaux = st.radio(
-        "La réduction des impacts environnementaux est-elle clé ?",
-        ("Oui", "Non")
-    )
-
-    solution_offshore = st.radio(
-        "Préférez-vous une solution adaptée aux contraintes offshore ?",
-        ("Oui", "Non")
-    )
-
-    phase_pilote = st.radio(
-        "Phase pilote acceptée pour tester la solution ?",
-        ("Oui", "Non")
-    )
-
-    # Données supplémentaires : Disponibilité, Rendement, Coût
-    disponibilites = {
-        "GS10 Xi": 96.6,
-        "GENIALEC": 96.5,
-        "SEMERON": 96.7
-    }
-
-    rendements = {
-        "GS10 Xi": 96.5,
-        "GENIALEC": 96.8,
-        "SEMERON": 96.7
-    }
-
-    couts = {
-        "GS10 Xi": 3.0,
-        "GENIALEC": 3.2,
-        "SEMERON": 3.3
-    }
-
-    # Pondération des critères
-    poids_fiabilite = 0.3 if fiabilite_prioritaire == "Oui" else 0.1
-    poids_cout = 0.4 if cout_initial_contrainte == "Oui" else 0.2
-    poids_rendement = 0.2 if productivite_energetique == "Production maximale recherchée" else 0.1
-    poids_impact = 0.1 if reduction_impacts_environnementaux == "Oui" else 0.05
-    poids_offshore = 0.1 if solution_offshore == "Oui" else 0.05
-    poids_pilote = 0.1 if phase_pilote == "Oui" else 0.05
-
-    # Calcul du score pour chaque machine
-    scores = {}
-
-    for modele in ["GS10 Xi", "GENIALEC", "SEMERON"]:
-        score = 0
-        
-        # Fiabilité et disponibilité
-        score += poids_fiabilite * (disponibilites[modele] / 100)
-        
-        # Rendement
-        score += poids_rendement * (rendements[modele] / 100)
-        
-        # Coût
-        score -= poids_cout * (couts[modele] / 3.5)  # Normalisation du coût (le plus bas est préférable)
-        
-        # Impact environnemental
-        if modele == "GS10 Xi" and reduction_impacts_environnementaux == "Oui":
-            score += poids_impact  # GS10 Xi est plus adapté aux critères environnementaux
-        
-        # Adaptation offshore
-        if modele == "GS10 Xi" and solution_offshore == "Oui":
-            score += poids_offshore
-        
-        # Phase pilote
-        if modele == "GS10 Xi" and phase_pilote == "Oui":
-            score += poids_pilote
-        
-        scores[modele] = score
-
-    # Trouver le modèle avec le score maximal
-    meilleure_offre = max(scores, key=scores.get)
-
-    # Affichage de la proposition
-    st.write(f"Proposition recommandée : {meilleure_offre}")
-
-    # Raison de la recommandation
-    if meilleure_offre == "GS10 Xi":
-        st.write("Raison : Solution fiable, rendement élevé et coût compétitif avec une excellente disponibilité. Adaptée aux préoccupations environnementales et offshore.")
-    elif meilleure_offre == "GENIALEC":
-        st.write("Raison : Rendement supérieur et bonne disponibilité, mais légèrement plus coûteuse.")
+# Fonction pour recommander une proposition avec pondération et argumentaire détaillé
+def recommander_proposition(fiabilite, cout_initial, productivite, impact_environnemental, offshore, phase_pilote):
+    # Pondérations des critères
+    pond_fiabilite = 10
+    pond_cout_initial = 6
+    pond_productivite = 8
+    pond_impact = 7
+    pond_offshore = 9
+    pond_phase_pilote = 5
+    
+    # Calcul des scores basés sur les réponses
+    score_gs10_xi = 0
+    score_gs6_ap = 0
+    score_gs10_ap = 0
+    
+    # Fiabilité et disponibilité (plus important si "Oui")
+    if fiabilite == "Oui":
+        score_gs10_xi += pond_fiabilite
     else:
-        st.write("Raison : Solution avec une très bonne disponibilité et rendement élevé, mais coût légèrement plus élevé sur 20 ans.")
+        score_gs6_ap += pond_fiabilite
+    
+    # Coût initial (plus important si "Oui")
+    if cout_initial == "Oui":
+        score_gs6_ap += pond_cout_initial
+    else:
+        score_gs10_xi += pond_cout_initial
+    
+    # Productivité énergétique (plus important si "Production maximale recherchée")
+    if productivite == "Production maximale recherchée":
+        score_gs10_ap += pond_productivite
+    else:
+        score_gs10_xi += pond_productivite
+    
+    # Impact environnemental (plus important si "Oui")
+    if impact_environnemental == "Oui":
+        score_gs10_xi += pond_impact
+    else:
+        score_gs6_ap += pond_impact
+    
+    # Adaptation aux contraintes offshore (plus important si "Oui")
+    if offshore == "Oui":
+        score_gs10_xi += pond_offshore
+    else:
+        score_gs6_ap += pond_offshore
+        score_gs10_ap += pond_offshore
+    
+    # Phase pilote (plus important si "Oui")
+    if phase_pilote == "Oui":
+        score_gs10_xi += pond_phase_pilote
+    else:
+        score_gs6_ap += pond_phase_pilote
+        score_gs10_ap += pond_phase_pilote
+    
+    # Décision finale : la solution avec le score le plus élevé est recommandée
+    if max(score_gs10_xi, score_gs6_ap, score_gs10_ap) == score_gs10_xi:
+        return "GS10 Xi (synchrone à excitation séparée)", "La GS10 Xi est idéale en raison de sa fiabilité, son adaptation aux contraintes offshore et son impact environnemental limité. Elle est particulièrement recommandée si la fiabilité est essentielle et si vous souhaitez minimiser les risques à long terme. Sa phase pilote permettra de tester la solution avant sa mise en œuvre finale."
+    
+    elif max(score_gs10_xi, score_gs6_ap, score_gs10_ap) == score_gs6_ap:
+        return "GS6 AP (synchrone aimants permanents)", "La GS6 AP est la solution la plus économique avec un bon compromis entre fiabilité et coût. Elle est recommandée si le coût initial est une contrainte majeure tout en garantissant un rendement acceptable. Bien que légèrement moins performant que la GS10, elle offre une bonne solution pour des projets terrestres ou des projets offshore limités."
+    
+    else:
+        return "GS10 AP (synchrone aimants permanents)", "La GS10 AP est idéale pour maximiser la productivité énergétique, avec un rendement exceptionnel. Elle est la solution la plus adaptée si la priorité est de maximiser l'efficacité énergétique tout en restant dans un compromis coût/efficacité acceptable. Elle est aussi un bon choix pour des projets où les contraintes environnementales sont modérées."
 
-# Appel de la fonction
-if __name__ == "__main__":
-    recommander_offre()
+# Titre et introduction
+st.title("Sélection de la Meilleure Proposition")
+st.write("Répondez aux questions suivantes pour obtenir la meilleure offre en fonction de vos priorités.")
+
+# Formulaire pour les critères
+fiabilite = st.radio("1. La fiabilité et la disponibilité sont-elles des critères essentiels pour vous ?", ["Oui", "Non"])
+cout_initial = st.radio("2. Le coût initial est-il un facteur limitant pour vous ?", ["Oui", "Non"])
+productivite = st.radio("3. Quelle priorité accordez-vous à la maximisation de la productivité énergétique ?", ["Production maximale recherchée", "Priorité secondaire"])
+impact_environnemental = st.radio("4. L'impact environnemental, notamment l'utilisation de terres rares, est-il un critère décisif dans votre choix ?", ["Oui", "Non"])
+offshore = st.radio("5. Votre projet est-il principalement destiné à des conditions offshore nécessitant une solution spécifique ?", ["Oui", "Non"])
+phase_pilote = st.radio("6. Êtes-vous prêt à accepter une phase pilote pour tester la solution avant sa mise en production définitive ?", ["Oui", "Non"])
+
+# Calcul de la meilleure proposition
+if st.button("Trouver la meilleure offre"):
+    proposition, raison = recommander_proposition(fiabilite, cout_initial, productivite, impact_environnemental, offshore, phase_pilote)
+    st.subheader(f"Proposition recommandée : {proposition}")
+    st.write(raison)
